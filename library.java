@@ -4,16 +4,11 @@ import java.time.LocalDate;
 import java.util.*;
 
 public class Library_System {
-
     /*
     Features:
     1. Login/Register System
     2. Admin Dashboard (Add/remove book, see list of borrowers, see recommendations)
     3. Guest Dashboard (Browse/borrow/return/recommend book)
-    
-    Missing features:
-    1. Alert admins if the borrowers exceeded their time limit of borrowing.
-    2. Inventory to see the books borrowed by guest.
      */
     private static Hashtable<String, String> registeredAcc = new Hashtable<>();
     private static Hashtable<String, String> borrowers = new Hashtable<>();
@@ -192,7 +187,7 @@ public class Library_System {
                                 if (books.get(bookName) != null) {
                                     System.out.println("You have chosen " + bookName + "!");
                                     System.out.print("Here is the link: ");
-                                    for (String i: books.keySet()) {
+                                    for (String i : books.keySet()) {
                                         if (bookName.equals(i)) {
                                             System.out.println(books.get(i));
                                         }
