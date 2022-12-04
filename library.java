@@ -1,4 +1,3 @@
-
 import java.time.LocalDate;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -183,7 +182,7 @@ public class Library_System {
                                                 String dec = input.nextLine();
                                                 if (dec.equals("n")) {
                                                     break; //If "Y" the system loops
-                                                } 
+                                                }
                                                 continue;
                                             }
                                             break;
@@ -220,6 +219,7 @@ public class Library_System {
                     boolean guestLogIn = true;
                     while (guestLogIn) {
                         System.out.println("================GUEST_" + username + "======================");
+                        System.out.println("Your borrowCount is: " + borrowCount);
                         for (int i = 0; i < guestCommands.length; i++) {
                             System.out.println((i + 1) + ". " + guestCommands[i]);
                         }
@@ -280,6 +280,21 @@ public class Library_System {
                                         bookName = input.nextLine();
                                         // if the bookName exists on books
                                         if (books.get(bookName) != null) {
+                                            boolean alreadyBorrowed = false;
+                                            if (borrowCount > 0) {
+                                                for (String i : borrowers.keySet()) {
+                                                    if (i.contains(username)) {
+                                                        if (borrowers.get(i).equals(bookName)) {
+                                                            alreadyBorrowed = true;
+                                                            System.out.println("You already borrowed this book!");
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            if (alreadyBorrowed) {
+                                                continue;
+                                            }
                                             borrowCount++;
                                             borrowers.put(username + ", " + date + ", " + "(" + borrowCount + ")", bookName);
                                             System.out.println("You have successfully borrowed " + bookName + "!");
