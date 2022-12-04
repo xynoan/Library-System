@@ -1,9 +1,11 @@
-package library_system;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Library_System {
+
     /*
     Features:
     1. Login/Register System
@@ -53,14 +55,32 @@ public class Library_System {
         return null;
     }
 
+    public static boolean borrowersHandler(String username) {
+        for (String i : borrowers.keySet()) {
+            if (i.contains(username)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void main(String[] args) {
         LocalDate date = LocalDate.now();
         String[] adminCommands = {"Add a new book", "Remove a book", "See list of borrowers", "View suggestions"};
         String[] guestCommands = {"Browse a book", "Borrow a book", "Return a book", "Suggest a book"};
-        HashSet<String> booksBorrowed = new HashSet<>();
         HashSet<String> suggestedBooks = new HashSet<>();
+        HashSet<String> loginsHistory = new HashSet<String>();
+        ArrayList<String> borrowCountHistory = new ArrayList<String>();
+        Pattern p = Pattern.compile("(?<!\\d)\\d(?!\\d)");
         int borrowCount = 0;
+        // admins
         registeredAcc.put("carlo", "morva");
+        // initial guest accounts
+        registeredAcc.put("carlo2", "morva2");
+        registeredAcc.put("carlo3", "morva3");
+        // initial available books
+        books.put("Java", "https://pdfdrive.com/Java");
+        books.put("JavaScript", "https://pdfdrive.com/JavaScript");
         Scanner input = new Scanner(System.in);
         while (true) {
             System.out.println("============LIBRARY_SYSTEM=================");
@@ -82,6 +102,7 @@ public class Library_System {
                 if (checkAccount(username, password) == null
                         && username.equals("carlo")
                         && password.equals("morva")) {
+                    loginsHistory.add(username);
                     System.out.println("================ADMIN======================");
                     for (int i = 0; i < adminCommands.length; i++) {
                         System.out.println((i + 1) + ". " + adminCommands[i]);
@@ -110,7 +131,10 @@ public class Library_System {
                             }
                             break;
                         case "2":
-                            System.out.print("Name of the book you want to remove: ");
+                            System.out.println("Name of the book you want to remove: ");
+                            for (String i : books.keySet()) {
+                                System.out.println(i);
+                            }
                             bookName = input.nextLine();
                             books.remove(bookName);
                             System.out.println("Book removed!");
@@ -118,12 +142,16 @@ public class Library_System {
                             break;
                         case "3":
                             System.out.println("Here are the list of borrowers: ");
-                            for (String i : borrowers.keySet()) {
-                                System.out.println(i + borrowers.get(i));
+                            if (borrowers.isEmpty()) {
+                                System.out.println("No guests borrowed for a moment..");
+                            } else {
+                                for (String i : borrowers.keySet()) {
+                                    System.out.println(i + borrowers.get(i));
+                                }
                             }
                             break;
                         case "4":
-                            if (suggestedBooks.size() == 0) { //Checks user-suggestion inventory
+                            if (suggestedBooks.isEmpty()) { //Checks user-suggestion inventory
                                 System.out.println("===========================================");
                                 System.out.println("No user-suggestions at the moment..."); //Alerts admin that there are no suggestions
                             } else {
@@ -161,6 +189,21 @@ public class Library_System {
                     }
                     // guest panel
                 } else if (checkAccount(username, password) == null) {
+                    if (!loginsHistory.contains(username)) {
+                        borrowCount = 0;
+                    }
+                    for (String i : borrowers.keySet()) {
+                        if (i.contains(username)) {
+                            System.out.println(i);
+                            Matcher m = p.matcher(i);
+                            while(m.find()) {
+                                borrowCountHistory.add(m.group());
+                            }
+                            borrowCount = Integer.parseInt(borrowCountHistory.get(borrowCountHistory.size() - 1));
+                        }
+                    }
+                    loginsHistory.add(username);
+                    System.out.println("borrowCount is: " + borrowCount);
                     System.out.println("================GUEST======================");
                     for (int i = 0; i < guestCommands.length; i++) {
                         System.out.println((i + 1) + ". " + guestCommands[i]);
@@ -203,7 +246,6 @@ public class Library_System {
                                 System.out.println("You already borrowed 2 books! Return at least "
                                         + "1 book in order to borrow again!");
                             } else {
-                                System.out.println(borrowCount);
                                 System.out.println("==========BORROWING_SYSTEM_RULES===========");
                                 System.out.println("1. Maximum of 2 books can be borrowed");
                                 System.out.println("2. You can borrow for as long as 1 month");
@@ -221,10 +263,10 @@ public class Library_System {
                                 while (true) {
                                     System.out.print("Name of the book you want to borrow: ");
                                     bookName = input.nextLine();
+                                    // if the bookName exists on books
                                     if (books.get(bookName) != null) {
                                         borrowCount++;
                                         borrowers.put(username + ", " + date + ", " + "(" + borrowCount + ")", bookName);
-                                        booksBorrowed.add(bookName);
                                         System.out.println("You have successfully borrowed " + bookName + "!");
                                         if (borrowCount != 2) {
                                             System.out.print("Would you like to borrow more?[y/n]: ");
@@ -241,36 +283,34 @@ public class Library_System {
                             }
                             break;
                         case "3":
-                            if (booksBorrowed.isEmpty()) {
+                            if (borrowersHandler(username) == false) {
                                 System.out.println("You have not borrowed any books.");
                             } else {
                                 while (true) {
                                     System.out.println("Here are the list of books you borrowed: ");
-                                    for (String book : booksBorrowed) {
-                                        System.out.println(book);
+                                    for (String i : borrowers.keySet()) {
+                                        if (i.contains(username)) {
+                                            System.out.println(borrowers.get(i));
+                                        }
                                     }
                                     System.out.print("Name of the book you want to return: ");
                                     bookName = input.nextLine();
-                                    if (booksBorrowed.contains(bookName)) {
-                                        for (String i : borrowers.keySet()) {
-                                            if (borrowers.get(i).equals(bookName)) {
-                                                borrowers.remove(i);
-                                            }
+                                    for (String i : borrowers.keySet()) {
+                                        if (i.contains(username) && borrowers.get(i).equals(bookName)) {
+                                            borrowers.remove(i);
+                                            break;
                                         }
-                                        borrowCount--;
-                                        booksBorrowed.remove(bookName);
-                                        System.out.println("Book returned!");
-                                        if (!booksBorrowed.isEmpty()) {
-                                            System.out.print("Would you like to return more?[y/n]: ");
-                                            String returnMore = input.nextLine();
-                                            if (returnMore.equals("n")) {
-                                                break;
-                                            }
-                                        } else {
+                                    }
+                                    borrowCount--;
+                                    System.out.println("Book returned!");
+                                    if (borrowersHandler(username) == true) {
+                                        System.out.print("Would you like to return more?[y/n]: ");
+                                        String returnMore = input.nextLine();
+                                        if (returnMore.equals("n")) {
                                             break;
                                         }
                                     } else {
-                                        System.out.println("No book found!");
+                                        break;
                                     }
                                 }
                             }
