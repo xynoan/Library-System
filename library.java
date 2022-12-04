@@ -196,7 +196,7 @@ public class Library_System {
                         if (i.contains(username)) {
                             System.out.println(i);
                             Matcher m = p.matcher(i);
-                            while(m.find()) {
+                            while (m.find()) {
                                 borrowCountHistory.add(m.group());
                             }
                             borrowCount = Integer.parseInt(borrowCountHistory.get(borrowCountHistory.size() - 1));
@@ -295,13 +295,23 @@ public class Library_System {
                                     }
                                     System.out.print("Name of the book you want to return: ");
                                     bookName = input.nextLine();
+                                    boolean noBookFound = false;
                                     for (String i : borrowers.keySet()) {
-                                        if (i.contains(username) && borrowers.get(i).equals(bookName)) {
-                                            borrowers.remove(i);
-                                            break;
+                                        if (i.contains(username)) {
+                                            if (borrowers.get(i).equals(bookName)) {
+                                                borrowCount--;
+                                                borrowers.remove(i);
+                                                break;
+                                            } else {
+                                                noBookFound = true;
+                                                System.out.println("No book found!");
+                                                break;
+                                            }
                                         }
                                     }
-                                    borrowCount--;
+                                    if (noBookFound) {
+                                        continue;
+                                    }
                                     System.out.println("Book returned!");
                                     if (borrowersHandler(username) == true) {
                                         System.out.print("Would you like to return more?[y/n]: ");
