@@ -42,27 +42,6 @@ public class Library_System {
         registeredAcc.put(username, password);
     }
 
-    public static void loginChoice() {
-        Scanner input = new Scanner(System.in);
-        System.out.println("====================Login/Register======================");
-        String[] commands = {"Login", "Register"};
-        System.out.println("What do you want to do?");
-        for (int i = 0; i < commands.length; i++){
-            System.out.println((i + 1) + ". " + commands[i]);
-        }
-        String userChoice = input.nextLine();
-        switch (userChoice) {
-            case "1":
-                mainCaller();
-            case "2":
-                register();
-        }
-    }
-
-    static void mainCaller(){
-        main(null);
-    }
-
     public static String checkAccount(String username, String password) {
         if (registeredAcc.get(username) == null) {
             return "Username doesn't exist!";
@@ -88,7 +67,7 @@ public class Library_System {
     public static void main(String[] args) {
         LocalDate date = LocalDate.now();
         String[] adminCommands = {"Add a new book", "Remove a book", "See list of borrowers", "View suggestions", "Log-out"};
-        String[] guestCommands = {"Browse a book", "Borrow a book", "Return a book", "Suggest a book"};
+        String[] guestCommands = {"Browse a book", "Borrow a book", "Return a book", "Suggest a book", "Log-out"};
         HashSet<String> suggestedBooks = new HashSet<>();
         HashSet<String> loginsHistory = new HashSet<String>();
         ArrayList<String> borrowCountHistory = new ArrayList<String>();
@@ -124,12 +103,13 @@ public class Library_System {
                         && username.equals("carlo")
                         && password.equals("morva")) {
                     loginsHistory.add(username);
-                    while (true){
-                        System.out.println("================ADMIN======================");
+                    boolean adminLogIn = true;
+                    while (adminLogIn) {
+                        System.out.println("================ADMIN_" + username + "======================");
                         for (int i = 0; i < adminCommands.length; i++) {
                             System.out.println((i + 1) + ". " + adminCommands[i]);
                         }
-                        System.out.println("Good day, Admin! " + "Today is: " + date + "\nWhat do you wanna do?[1-4]");
+                        System.out.println("Good day, Admin! " + "Today is: " + date + "\nWhat do you wanna do?[1-5]");
                         String adminCommand = input.nextLine();
                         String bookName, bookLink;
                         switch (adminCommand) {
@@ -198,22 +178,26 @@ public class Library_System {
                                             } else {
                                                 System.out.println("Book not found!"); //If no such book has been found on the list
                                             }
-                                            System.out.println("Would you like to add another? [y/n]"); //Prompts the admin if he wants to add more (Looping it again)
-                                            String dec = input.nextLine();
-                                            if (dec.equals("n")) {
-                                                break; //If "Y" the system loops
+                                            if (!suggestedBooks.isEmpty()) {
+                                                System.out.println("Would you like to add another? [y/n]"); //Prompts the admin if he wants to add more (Looping it again)
+                                                String dec = input.nextLine();
+                                                if (dec.equals("n")) {
+                                                    break; //If "Y" the system loops
+                                                } 
+                                                continue;
                                             }
+                                            break;
                                         }
                                     } else {
                                         break; //If entered "N" the loop breaks        
                                     }
                                 }
-                            case "5": //Logout
+                                break;
+                            case "5":
                                 System.out.println("Do you want to Log-out? [y/n]"); //Asks for confirmation (for accidental input of actions)
                                 String answer = input.nextLine();
-                                if (answer.equals("y")){
-                                    loginChoice();
-                                    break;
+                                if (answer.equals("y")) {
+                                    adminLogIn = false;
                                 }
                         }
                     }
@@ -233,13 +217,13 @@ public class Library_System {
                         }
                     }
                     loginsHistory.add(username);
-                    while (true){
-                        System.out.println("borrowCount is: " + borrowCount);
-                        System.out.println("================GUEST======================");
+                    boolean guestLogIn = true;
+                    while (guestLogIn) {
+                        System.out.println("================GUEST_" + username + "======================");
                         for (int i = 0; i < guestCommands.length; i++) {
                             System.out.println((i + 1) + ". " + guestCommands[i]);
                         }
-                        System.out.println("Good day, Guest!" + " Today is: " + date + "\nWhat do you wanna do?[1-4]");
+                        System.out.println("Good day, Guest!" + " Today is: " + date + "\nWhat do you wanna do?[1-5]");
                         String guestCommand = input.nextLine();
                         String bookName;
                         switch (guestCommand) {
@@ -324,30 +308,33 @@ public class Library_System {
                                                 System.out.println(borrowers.get(i));
                                             }
                                         }
-                                    System.out.print("Name of the book you want to return: ");
-                                    bookName = input.nextLine();
-                                    boolean noBookFound = false;
-                                    for (String i : borrowers.keySet()) {
-                                        if (i.contains(username)) {
-                                            if (borrowers.get(i).equals(bookName)) {
-                                                borrowCount--;
-                                                borrowers.remove(i);
-                                                break;
-                                            } else {
-                                                noBookFound = true;
-                                                System.out.println("No book found!");
-                                                break;
+                                        System.out.print("Name of the book you want to return: ");
+                                        bookName = input.nextLine();
+                                        boolean noBookFound = false;
+                                        for (String i : borrowers.keySet()) {
+                                            if (i.contains(username)) {
+                                                if (borrowers.get(i).equals(bookName)) {
+                                                    borrowCount--;
+                                                    borrowers.remove(i);
+                                                    break;
+                                                } else {
+                                                    noBookFound = true;
+                                                    System.out.println("No book found!");
+                                                    break;
+                                                }
                                             }
                                         }
-                                    }
-                                    if (noBookFound) {
-                                        continue;
-                                    }
-                                    System.out.println("Book returned!");
-                                    if (borrowersHandler(username) == true) {
-                                        System.out.print("Would you like to return more?[y/n]: ");
-                                        String returnMore = input.nextLine();
-                                        if (returnMore.equals("n")) {
+                                        if (noBookFound) {
+                                            continue;
+                                        }
+                                        System.out.println("Book returned!");
+                                        if (borrowersHandler(username) == true) {
+                                            System.out.print("Would you like to return more?[y/n]: ");
+                                            String returnMore = input.nextLine();
+                                            if (returnMore.equals("n")) {
+                                                break;
+                                            }
+                                        } else {
                                             break;
                                         }
                                     }
@@ -366,12 +353,12 @@ public class Library_System {
                                         break;
                                     }
                                 }
-                            case "5": //Same code as before (admins panel)
-                                System.out.println("Do you want to Log-out? [y/n]");
+                                break;
+                            case "5":
+                                System.out.println("Do you want to Log-out? [y/n]"); //Asks for confirmation (for accidental input of actions)
                                 String answer = input.nextLine();
-                                if (answer.equals("y")){
-                                    loginChoice();
-                                    break;
+                                if (answer.equals("y")) {
+                                    guestLogIn = false;
                                 }
                         }
                     }
@@ -388,6 +375,5 @@ public class Library_System {
                 register();
             }
         }
-
     }
 }
