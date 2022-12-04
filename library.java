@@ -42,6 +42,27 @@ public class Library_System {
         registeredAcc.put(username, password);
     }
 
+    public static void loginChoice() {
+        Scanner input = new Scanner(System.in);
+        System.out.println("====================Login/Register======================");
+        String[] commands = {"Login", "Register"};
+        System.out.println("What do you want to do?");
+        for (int i = 0; i < commands.length; i++){
+            System.out.println((i + 1) + ". " + commands[i]);
+        }
+        String userChoice = input.nextLine();
+        switch (userChoice) {
+            case "1":
+                mainCaller();
+            case "2":
+                register();
+        }
+    }
+
+    static void mainCaller(){
+        main(null);
+    }
+
     public static String checkAccount(String username, String password) {
         if (registeredAcc.get(username) == null) {
             return "Username doesn't exist!";
@@ -66,7 +87,7 @@ public class Library_System {
 
     public static void main(String[] args) {
         LocalDate date = LocalDate.now();
-        String[] adminCommands = {"Add a new book", "Remove a book", "See list of borrowers", "View suggestions"};
+        String[] adminCommands = {"Add a new book", "Remove a book", "See list of borrowers", "View suggestions", "Log-out"};
         String[] guestCommands = {"Browse a book", "Borrow a book", "Return a book", "Suggest a book"};
         HashSet<String> suggestedBooks = new HashSet<>();
         HashSet<String> loginsHistory = new HashSet<String>();
@@ -103,89 +124,98 @@ public class Library_System {
                         && username.equals("carlo")
                         && password.equals("morva")) {
                     loginsHistory.add(username);
-                    System.out.println("================ADMIN======================");
-                    for (int i = 0; i < adminCommands.length; i++) {
-                        System.out.println((i + 1) + ". " + adminCommands[i]);
-                    }
-                    System.out.println("Good day, Admin! " + "Today is: " + date + "\nWhat do you wanna do?[1-4]");
-                    String adminCommand = input.nextLine();
-                    String bookName, bookLink;
-                    switch (adminCommand) {
-                        case "1":
-                            while (true) {
-                                System.out.print("Name of the book you want to add: ");
-                                bookName = input.nextLine();
-                                System.out.print("Name of the link: ");
-                                bookLink = input.nextLine();
-                                books.put(bookName, bookLink);
-                                System.out.println("===============BOOK_ADDED==================");
-                                for (String i : books.keySet()) {
-                                    System.out.println(i + ", Link: " + books.get(i));
+                    while (true){
+                        System.out.println("================ADMIN======================");
+                        for (int i = 0; i < adminCommands.length; i++) {
+                            System.out.println((i + 1) + ". " + adminCommands[i]);
+                        }
+                        System.out.println("Good day, Admin! " + "Today is: " + date + "\nWhat do you wanna do?[1-4]");
+                        String adminCommand = input.nextLine();
+                        String bookName, bookLink;
+                        switch (adminCommand) {
+                            case "1":
+                                while (true) {
+                                    System.out.print("Name of the book you want to add: ");
+                                    bookName = input.nextLine();
+                                    System.out.print("Name of the link: ");
+                                    bookLink = input.nextLine();
+                                    books.put(bookName, bookLink);
+                                    System.out.println("===============BOOK_ADDED==================");
+                                    for (String i : books.keySet()) {
+                                        System.out.println(i + ", Link: " + books.get(i));
+                                    }
+                                    System.out.println("===========================================");
+                                    System.out.print("Would you like to add more?[y/n]: ");
+                                    String addMore = input.nextLine();
+                                    if (addMore.equals("n")) {
+                                        break;
+                                    }
                                 }
-                                System.out.println("===========================================");
-                                System.out.print("Would you like to add more?[y/n]: ");
-                                String addMore = input.nextLine();
-                                if (addMore.equals("n")) {
+                                break;
+                            case "2":
+                                System.out.println("Name of the book you want to remove: ");
+                                for (String i : books.keySet()) {
+                                    System.out.println(i);
+                                }
+                                bookName = input.nextLine();
+                                books.remove(bookName);
+                                System.out.println("Book removed!");
+                                System.out.println(books);
+                                break;
+                            case "3":
+                                System.out.println("Here are the list of borrowers: ");
+                                if (borrowers.isEmpty()) {
+                                    System.out.println("No guests borrowed for a moment..");
+                                } else {
+                                    for (String i : borrowers.keySet()) {
+                                        System.out.println(i + borrowers.get(i));
+                                    }
+                                }
+                                break;
+                            case "4":
+                                if (suggestedBooks.isEmpty()) { //Checks user-suggestion inventory
+                                    System.out.println("===========================================");
+                                    System.out.println("No user-suggestions at the moment..."); //Alerts admin that there are no suggestions
+                                } else {
+                                    System.out.println("Here are the user-suggested books: "); //Alerts admin that there are suggestions
+                                    for (String sugg : suggestedBooks) { //Prints suggested books by the users
+                                        System.out.println(sugg);
+                                    }
+                                    System.out.println("===========================================");
+                                    System.out.println("Would you like to add any of these? [y/n]"); //Prompts admin if it wants to add anything on the list
+                                    String decision = input.nextLine();
+                                    if (decision.equals("y")) {
+                                        while (true) {
+                                            System.out.println("Please select one: "); //Prompts to select one from the list
+                                            System.out.println(suggestedBooks);
+                                            String add = input.nextLine();
+                                            if (suggestedBooks.contains(add)) { //Checks if the name exists on the list
+                                                System.out.println("Please input link for this book: ");
+                                                String link = input.nextLine();
+                                                books.put(add, link);
+                                                suggestedBooks.remove(add);
+                                                System.out.println("Book has been added to our Library!"); //Notifies the admin that the book has been added
+                                            } else {
+                                                System.out.println("Book not found!"); //If no such book has been found on the list
+                                            }
+                                            System.out.println("Would you like to add another? [y/n]"); //Prompts the admin if he wants to add more (Looping it again)
+                                            String dec = input.nextLine();
+                                            if (dec.equals("n")) {
+                                                break; //If "Y" the system loops
+                                            }
+                                        }
+                                    } else {
+                                        break; //If entered "N" the loop breaks        
+                                    }
+                                }
+                            case "5": //Logout
+                                System.out.println("Do you want to Log-out? [y/n]"); //Asks for confirmation (for accidental input of actions)
+                                String answer = input.nextLine();
+                                if (answer.equals("y")){
+                                    loginChoice();
                                     break;
                                 }
-                            }
-                            break;
-                        case "2":
-                            System.out.println("Name of the book you want to remove: ");
-                            for (String i : books.keySet()) {
-                                System.out.println(i);
-                            }
-                            bookName = input.nextLine();
-                            books.remove(bookName);
-                            System.out.println("Book removed!");
-                            System.out.println(books);
-                            break;
-                        case "3":
-                            System.out.println("Here are the list of borrowers: ");
-                            if (borrowers.isEmpty()) {
-                                System.out.println("No guests borrowed for a moment..");
-                            } else {
-                                for (String i : borrowers.keySet()) {
-                                    System.out.println(i + borrowers.get(i));
-                                }
-                            }
-                            break;
-                        case "4":
-                            if (suggestedBooks.isEmpty()) { //Checks user-suggestion inventory
-                                System.out.println("===========================================");
-                                System.out.println("No user-suggestions at the moment..."); //Alerts admin that there are no suggestions
-                            } else {
-                                System.out.println("Here are the user-suggested books: "); //Alerts admin that there are suggestions
-                                for (String sugg : suggestedBooks) { //Prints suggested books by the users
-                                    System.out.println(sugg);
-                                }
-                                System.out.println("===========================================");
-                                System.out.println("Would you like to add any of these? [y/n]"); //Prompts admin if it wants to add anything on the list
-                                String decision = input.nextLine();
-                                if (decision.equals("y")) {
-                                    while (true) {
-                                        System.out.println("Please select one: "); //Prompts to select one from the list
-                                        System.out.println(suggestedBooks);
-                                        String add = input.nextLine();
-                                        if (suggestedBooks.contains(add)) { //Checks if the name exists on the list
-                                            System.out.println("Please input link for this book: ");
-                                            String link = input.nextLine();
-                                            books.put(add, link);
-                                            suggestedBooks.remove(add);
-                                            System.out.println("Book has been added to our Library!"); //Notifies the admin that the book has been added
-                                        } else {
-                                            System.out.println("Book not found!"); //If no such book has been found on the list
-                                        }
-                                        System.out.println("Would you like to add another? [y/n]"); //Prompts the admin if he wants to add more (Looping it again)
-                                        String dec = input.nextLine();
-                                        if (dec.equals("n")) {
-                                            break; //If "Y" the system loops
-                                        }
-                                    }
-                                } else {
-                                    break; //If entered "N" the loop breaks        
-                                }
-                            }
+                        }
                     }
                     // guest panel
                 } else if (checkAccount(username, password) == null) {
@@ -203,52 +233,17 @@ public class Library_System {
                         }
                     }
                     loginsHistory.add(username);
-                    System.out.println("borrowCount is: " + borrowCount);
-                    System.out.println("================GUEST======================");
-                    for (int i = 0; i < guestCommands.length; i++) {
-                        System.out.println((i + 1) + ". " + guestCommands[i]);
-                    }
-                    System.out.println("Good day, Guest!" + " Today is: " + date + "\nWhat do you wanna do?[1-4]");
-                    String guestCommand = input.nextLine();
-                    String bookName;
-                    switch (guestCommand) {
-                        case "1":
-                            System.out.println("==============BOOKS_AVAILABLE==============");
-                            if (books.isEmpty()) {
-                                System.out.println("No books available at the moment"
-                                        + ", please come back later!");
-                                continue;
-                            } else {
-                                for (String i : books.keySet()) {
-                                    System.out.println(i);
-                                }
-                            }
-                            System.out.println("===========================================");
-                            while (true) {
-                                System.out.print("Name of the book you want to browse: ");
-                                bookName = input.nextLine();
-                                if (books.get(bookName) != null) {
-                                    System.out.println("You have chosen " + bookName + "!");
-                                    System.out.print("Here is the link: ");
-                                    for (String i : books.keySet()) {
-                                        if (bookName.equals(i)) {
-                                            System.out.println(books.get(i));
-                                        }
-                                    }
-                                    break;
-                                } else {
-                                    System.out.println("No book found!");
-                                }
-                            }
-                            break;
-                        case "2":
-                            if (borrowCount == 2) {
-                                System.out.println("You already borrowed 2 books! Return at least "
-                                        + "1 book in order to borrow again!");
-                            } else {
-                                System.out.println("==========BORROWING_SYSTEM_RULES===========");
-                                System.out.println("1. Maximum of 2 books can be borrowed");
-                                System.out.println("2. You can borrow for as long as 1 month");
+                    while (true){
+                        System.out.println("borrowCount is: " + borrowCount);
+                        System.out.println("================GUEST======================");
+                        for (int i = 0; i < guestCommands.length; i++) {
+                            System.out.println((i + 1) + ". " + guestCommands[i]);
+                        }
+                        System.out.println("Good day, Guest!" + " Today is: " + date + "\nWhat do you wanna do?[1-4]");
+                        String guestCommand = input.nextLine();
+                        String bookName;
+                        switch (guestCommand) {
+                            case "1":
                                 System.out.println("==============BOOKS_AVAILABLE==============");
                                 if (books.isEmpty()) {
                                     System.out.println("No books available at the moment"
@@ -261,18 +256,14 @@ public class Library_System {
                                 }
                                 System.out.println("===========================================");
                                 while (true) {
-                                    System.out.print("Name of the book you want to borrow: ");
+                                    System.out.print("Name of the book you want to browse: ");
                                     bookName = input.nextLine();
-                                    // if the bookName exists on books
                                     if (books.get(bookName) != null) {
-                                        borrowCount++;
-                                        borrowers.put(username + ", " + date + ", " + "(" + borrowCount + ")", bookName);
-                                        System.out.println("You have successfully borrowed " + bookName + "!");
-                                        if (borrowCount != 2) {
-                                            System.out.print("Would you like to borrow more?[y/n]: ");
-                                            String borrowMore = input.nextLine();
-                                            if (borrowMore.equals("y")) {
-                                                continue;
+                                        System.out.println("You have chosen " + bookName + "!");
+                                        System.out.print("Here is the link: ");
+                                        for (String i : books.keySet()) {
+                                            if (bookName.equals(i)) {
+                                                System.out.println(books.get(i));
                                             }
                                         }
                                         break;
@@ -280,19 +271,59 @@ public class Library_System {
                                         System.out.println("No book found!");
                                     }
                                 }
-                            }
-                            break;
-                        case "3":
-                            if (borrowersHandler(username) == false) {
-                                System.out.println("You have not borrowed any books.");
-                            } else {
-                                while (true) {
-                                    System.out.println("Here are the list of books you borrowed: ");
-                                    for (String i : borrowers.keySet()) {
-                                        if (i.contains(username)) {
-                                            System.out.println(borrowers.get(i));
+                                break;
+                            case "2":
+                                if (borrowCount == 2) {
+                                    System.out.println("You already borrowed 2 books! Return at least "
+                                            + "1 book in order to borrow again!");
+                                } else {
+                                    System.out.println("==========BORROWING_SYSTEM_RULES===========");
+                                    System.out.println("1. Maximum of 2 books can be borrowed");
+                                    System.out.println("2. You can borrow for as long as 1 month");
+                                    System.out.println("==============BOOKS_AVAILABLE==============");
+                                    if (books.isEmpty()) {
+                                        System.out.println("No books available at the moment"
+                                                + ", please come back later!");
+                                        continue;
+                                    } else {
+                                        for (String i : books.keySet()) {
+                                            System.out.println(i);
                                         }
                                     }
+                                    System.out.println("===========================================");
+                                    while (true) {
+                                        System.out.print("Name of the book you want to borrow: ");
+                                        bookName = input.nextLine();
+                                        // if the bookName exists on books
+                                        if (books.get(bookName) != null) {
+                                            borrowCount++;
+                                            borrowers.put(username + ", " + date + ", " + "(" + borrowCount + ")", bookName);
+                                            System.out.println("You have successfully borrowed " + bookName + "!");
+                                            if (borrowCount != 2) {
+                                                System.out.print("Would you like to borrow more?[y/n]: ");
+                                                String borrowMore = input.nextLine();
+                                                if (borrowMore.equals("y")) {
+                                                    continue;
+                                                }
+                                            }
+                                            break;
+                                        } else {
+                                            System.out.println("No book found!");
+                                        }
+                                    }
+                                }
+                                break;
+                            case "3":
+                                if (borrowersHandler(username) == false) {
+                                    System.out.println("You have not borrowed any books.");
+                                } else {
+                                    while (true) {
+                                        System.out.println("Here are the list of books you borrowed: ");
+                                        for (String i : borrowers.keySet()) {
+                                            if (i.contains(username)) {
+                                                System.out.println(borrowers.get(i));
+                                            }
+                                        }
                                     System.out.print("Name of the book you want to return: ");
                                     bookName = input.nextLine();
                                     boolean noBookFound = false;
@@ -319,25 +350,30 @@ public class Library_System {
                                         if (returnMore.equals("n")) {
                                             break;
                                         }
-                                    } else {
+                                    }
+                                }
+                                break;
+                            case "4":
+                                System.out.println("==========SUGGEST_A_BOOK===========");
+                                while (true) {
+                                    System.out.println("Please enter the name of the book: "); //Asks the user the name of the book
+                                    String suggestedBook = input.nextLine();
+                                    suggestedBooks.add(suggestedBook); //Adds the book to the suggestions list
+                                    System.out.println("Book has been added to user-recommendations!"); //Notifies the user that the book has been added
+                                    System.out.println("Would you like to recommend more? [y/n]"); //Prompts if the user wants to add more (System loops)
+                                    String suggestMore = input.nextLine();
+                                    if (suggestMore.equals("n")) { //If entered "N" the loop breaks
                                         break;
                                     }
                                 }
-                            }
-                            break;
-                        case "4":
-                            System.out.println("==========SUGGEST_A_BOOK===========");
-                            while (true) {
-                                System.out.println("Please enter the name of the book: "); //Asks the user the name of the book
-                                String suggestedBook = input.nextLine();
-                                suggestedBooks.add(suggestedBook); //Adds the book to the suggestions list
-                                System.out.println("Book has been added to user-recommendations!"); //Notifies the user that the book has been added
-                                System.out.println("Would you like to recommend more? [y/n]"); //Prompts if the user wants to add more (System loops)
-                                String suggestMore = input.nextLine();
-                                if (suggestMore.equals("n")) { //If entered "N" the loop breaks
+                            case "5": //Same code as before (admins panel)
+                                System.out.println("Do you want to Log-out? [y/n]");
+                                String answer = input.nextLine();
+                                if (answer.equals("y")){
+                                    loginChoice();
                                     break;
                                 }
-                            }
+                        }
                     }
                     // if the user doesn't have an account, they can register
                 } else {
