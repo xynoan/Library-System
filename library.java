@@ -223,7 +223,7 @@ public class Library_System {
                         for (int i = 0; i < guestCommands.length; i++) {
                             System.out.println((i + 1) + ". " + guestCommands[i]);
                         }
-                        System.out.println("Good day, Guest!" + " Today is: " + date + "\nWhat do you wanna do?[1-4]");
+                        System.out.println("Good day, Guest!" + " Today is: " + date + "\nWhat do you wanna do?[1-5]");
                         String guestCommand = input.nextLine();
                         String bookName;
                         switch (guestCommand) {
