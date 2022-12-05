@@ -368,7 +368,7 @@ public class Library_System {
                                         /* 
                                         this for-loop updates the borrowers' key whenever
                                         they return a book 
-                                        */
+                                         */
                                         outerloop2:
                                         for (String i : borrowers.keySet()) {
                                             String[] splittedKeys = i.split(",");
@@ -376,12 +376,10 @@ public class Library_System {
                                                 Matcher m = extractUsername.matcher(j);
                                                 if (m.find()) {
                                                     if (m.group().equals(username)) {
-                                                        if (!borrowers.get(i).equals(bookName)) {
-                                                            borrowers.put(i.replaceAll("\\(\\d\\)",
-                                                                    "(" + borrowCount + ")"),
-                                                                    borrowers.get(i));
-                                                            borrowers.remove(i);
-                                                        }
+                                                        borrowers.put(i.replaceAll("\\(\\d\\)",
+                                                                "(" + borrowCount + ")"),
+                                                                borrowers.get(i));
+                                                        borrowers.remove(i);
                                                         break outerloop2;
                                                     }
                                                 }
