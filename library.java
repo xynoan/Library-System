@@ -5,16 +5,11 @@ import java.util.regex.Pattern;
 
 public class Library_System {
 
-    /*
-    Features:
-    1. Login/Register System
-    2. Admin Dashboard (Add/remove book, see list of borrowers, see recommendations)
-    3. Guest Dashboard (Browse/borrow/return/recommend book)
-     */
     private static Hashtable<String, String> registeredAcc = new Hashtable<>();
     private static Hashtable<String, String> borrowers = new Hashtable<>();
     private static Hashtable<String, String> books = new Hashtable<>();
     private static Set<String> keys = registeredAcc.keySet();
+    private static Pattern extractUsername = Pattern.compile("^[a-zA-Z]+\\d+$|^[a-zA-Z]+");
 
     public static void register() {
         Scanner input = new Scanner(System.in);
@@ -56,8 +51,14 @@ public class Library_System {
 
     public static boolean borrowersHandler(String username) {
         for (String i : borrowers.keySet()) {
-            if (i.contains(username)) {
-                return true;
+            String[] splittedKeys = i.split(",");
+            for (String j : splittedKeys) {
+                Matcher m = extractUsername.matcher(j);
+                if (m.find()) {
+                    if (m.group().equals(username)) {
+                        return true;
+                    }
+                }
             }
         }
         return false;
@@ -68,15 +69,14 @@ public class Library_System {
         String[] adminCommands = {"Add a new book", "Remove a book", "See list of borrowers", "View suggestions", "Log-out"};
         String[] guestCommands = {"Browse a book", "Borrow a book", "Return a book", "Suggest a book", "Log-out"};
         HashSet<String> suggestedBooks = new HashSet<>();
-        HashSet<String> loginsHistory = new HashSet<String>();
         ArrayList<String> borrowCountHistory = new ArrayList<String>();
-        Pattern p = Pattern.compile("(?<!\\d)\\d(?!\\d)");
         int borrowCount = 0;
         // admins
         registeredAcc.put("carlo", "morva");
         // initial guest accounts
         registeredAcc.put("carlo2", "morva2");
         registeredAcc.put("carlo3", "morva3");
+        registeredAcc.put("carlo32", "morva");
         // initial available books
         books.put("Java", "https://pdfdrive.com/Java");
         books.put("JavaScript", "https://pdfdrive.com/JavaScript");
@@ -101,7 +101,6 @@ public class Library_System {
                 if (checkAccount(username, password) == null
                         && username.equals("carlo")
                         && password.equals("morva")) {
-                    loginsHistory.add(username);
                     boolean adminLogIn = true;
                     while (adminLogIn) {
                         System.out.println("================ADMIN_" + username + "======================");
@@ -202,20 +201,27 @@ public class Library_System {
                     }
                     // guest panel
                 } else if (checkAccount(username, password) == null) {
-                    if (!loginsHistory.contains(username)) {
+                    // if the guest is not in the list of borrowers
+                    if (!borrowersHandler(username)) {
                         borrowCount = 0;
                     }
+                    Pattern oneDigit = Pattern.compile("(?<!\\d)\\d(?!\\d)");
                     for (String i : borrowers.keySet()) {
-                        if (i.contains(username)) {
-                            System.out.println(i);
-                            Matcher m = p.matcher(i);
-                            while (m.find()) {
-                                borrowCountHistory.add(m.group());
+                        String[] splittedKeys = i.split(",");
+                        for (String j : splittedKeys) {
+                            Matcher m = extractUsername.matcher(j);
+                            if (m.find()) {
+                                if (m.group().equals(username)) {
+                                    System.out.println(i);
+                                    Matcher m2 = oneDigit.matcher(i);
+                                    while (m2.find()) {
+                                        borrowCountHistory.add(m2.group());
+                                    }
+                                    borrowCount = Integer.parseInt(borrowCountHistory.get(borrowCountHistory.size() - 1));
+                                }
                             }
-                            borrowCount = Integer.parseInt(borrowCountHistory.get(borrowCountHistory.size() - 1));
                         }
                     }
-                    loginsHistory.add(username);
                     boolean guestLogIn = true;
                     while (guestLogIn) {
                         System.out.println("================GUEST_" + username + "======================");
@@ -283,11 +289,17 @@ public class Library_System {
                                             boolean alreadyBorrowed = false;
                                             if (borrowCount > 0) {
                                                 for (String i : borrowers.keySet()) {
-                                                    if (i.contains(username)) {
-                                                        if (borrowers.get(i).equals(bookName)) {
-                                                            alreadyBorrowed = true;
-                                                            System.out.println("You already borrowed this book!");
-                                                            break;
+                                                    String[] splittedKeys = i.split(",");
+                                                    for (String j : splittedKeys) {
+                                                        Matcher m = extractUsername.matcher(j);
+                                                        if (m.find()) {
+                                                            if (m.group().equals(username)) {
+                                                                if (borrowers.get(i).equals(bookName)) {
+                                                                    alreadyBorrowed = true;
+                                                                    System.out.println("You already borrowed this book!");
+                                                                    break;
+                                                                }
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -319,28 +331,58 @@ public class Library_System {
                                     while (true) {
                                         System.out.println("Here are the list of books you borrowed: ");
                                         for (String i : borrowers.keySet()) {
-                                            if (i.contains(username)) {
-                                                System.out.println(borrowers.get(i));
+                                            String[] splittedKeys = i.split(",");
+                                            for (String j : splittedKeys) {
+                                                Matcher m = extractUsername.matcher(j);
+                                                if (m.find()) {
+                                                    if (m.group().equals(username)) {
+                                                        System.out.println(borrowers.get(i));
+                                                    }
+                                                }
                                             }
                                         }
                                         System.out.print("Name of the book you want to return: ");
                                         bookName = input.nextLine();
                                         boolean noBookFound = false;
+                                        outerloop:
                                         for (String i : borrowers.keySet()) {
-                                            if (i.contains(username)) {
-                                                if (borrowers.get(i).equals(bookName)) {
-                                                    borrowCount--;
-                                                    borrowers.remove(i);
-                                                    break;
-                                                } else {
-                                                    noBookFound = true;
-                                                    System.out.println("No book found!");
-                                                    break;
+                                            String[] splittedKeys = i.split(",");
+                                            for (String j : splittedKeys) {
+                                                Matcher m = extractUsername.matcher(j);
+                                                if (m.find()) {
+                                                    if (m.group().equals(username)) {
+                                                        if (borrowers.get(i).equals(bookName)) {
+                                                            borrowCount--;
+                                                            borrowers.remove(i);
+                                                        } else {
+                                                            noBookFound = true;
+                                                            System.out.println("No book found!");
+                                                        }
+                                                        break outerloop;
+                                                    }
                                                 }
                                             }
                                         }
                                         if (noBookFound) {
                                             continue;
+                                        }
+                                        outerloop2:
+                                        for (String i : borrowers.keySet()) {
+                                            String[] splittedKeys = i.split(",");
+                                            for (String j : splittedKeys) {
+                                                Matcher m = extractUsername.matcher(j);
+                                                if (m.find()) {
+                                                    if (m.group().equals(username)) {
+                                                        if (!borrowers.get(i).equals(bookName)) {
+                                                            borrowers.put(i.replaceAll("\\(\\d\\)",
+                                                                    "(" + borrowCount + ")"), 
+                                                                    borrowers.get(i));
+                                                            borrowers.remove(i);
+                                                        }
+                                                        break outerloop2;
+                                                    }
+                                                }
+                                            }
                                         }
                                         System.out.println("Book returned!");
                                         if (borrowersHandler(username) == true) {
