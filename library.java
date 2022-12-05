@@ -365,6 +365,10 @@ public class Library_System {
                                         if (noBookFound) {
                                             continue;
                                         }
+                                        /* 
+                                        this for-loop updates the borrowers' key whenever
+                                        they return a book 
+                                        */
                                         outerloop2:
                                         for (String i : borrowers.keySet()) {
                                             String[] splittedKeys = i.split(",");
