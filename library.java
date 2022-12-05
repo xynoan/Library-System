@@ -205,17 +205,16 @@ public class Library_System {
                     if (!borrowersHandler(username)) {
                         borrowCount = 0;
                     }
-                    Pattern oneDigit = Pattern.compile("(?<!\\d)\\d(?!\\d)");
+                    Pattern digitWithParenthesis = Pattern.compile("\\(\\d\\)");
                     for (String i : borrowers.keySet()) {
                         String[] splittedKeys = i.split(",");
                         for (String j : splittedKeys) {
                             Matcher m = extractUsername.matcher(j);
                             if (m.find()) {
                                 if (m.group().equals(username)) {
-                                    System.out.println(i);
-                                    Matcher m2 = oneDigit.matcher(i);
+                                    Matcher m2 = digitWithParenthesis.matcher(i);
                                     while (m2.find()) {
-                                        borrowCountHistory.add(m2.group());
+                                        borrowCountHistory.add(m2.group().replaceAll("[()]", ""));
                                     }
                                     borrowCount = Integer.parseInt(borrowCountHistory.get(borrowCountHistory.size() - 1));
                                 }
@@ -375,7 +374,7 @@ public class Library_System {
                                                     if (m.group().equals(username)) {
                                                         if (!borrowers.get(i).equals(bookName)) {
                                                             borrowers.put(i.replaceAll("\\(\\d\\)",
-                                                                    "(" + borrowCount + ")"), 
+                                                                    "(" + borrowCount + ")"),
                                                                     borrowers.get(i));
                                                             borrowers.remove(i);
                                                         }
