@@ -429,8 +429,10 @@ public class Library_System {
                         register();
                     }
                 }
-            } else {
+            } else if (doesUserHaveAcc.equals("n")) {
                 register();
+            } else {
+                System.out.println("Wrong input!");
             }
         }
     }
