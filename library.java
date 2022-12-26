@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 public class Library_System {
 
     private static Hashtable<String, String> registeredAcc = new Hashtable<>();
-    private static Hashtable<String, String> borrowers = new Hashtable<>();
+    private static TreeMap<String, String> borrowers = new TreeMap<String, String>();
     private static Hashtable<String, String> books = new Hashtable<>();
     private static Set<String> keys = registeredAcc.keySet();
     private static Pattern extractUsername = Pattern.compile("^[a-zA-Z]+\\d+$|^[a-zA-Z]+");
