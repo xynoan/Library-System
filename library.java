@@ -9,7 +9,6 @@ public class Library_System {
     private static TreeMap<String, String> borrowers = new TreeMap<String, String>();
     private static Hashtable<String, String> books = new Hashtable<>();
     private static Set<String> keys = registeredAcc.keySet();
-    private static Pattern extractUsername = Pattern.compile("^[a-zA-Z]+\\d+$|^[a-zA-Z]+");
 
     public static void register() {
         Scanner input = new Scanner(System.in);
@@ -53,11 +52,8 @@ public class Library_System {
         for (String i : borrowers.keySet()) {
             String[] splittedKeys = i.split(",");
             for (String j : splittedKeys) {
-                Matcher m = extractUsername.matcher(j);
-                if (m.find()) {
-                    if (m.group().equals(username)) {
-                        return true;
-                    }
+                if (j.equals(username)) {
+                    return true;
                 }
             }
         }
@@ -209,15 +205,12 @@ public class Library_System {
                     for (String i : borrowers.keySet()) {
                         String[] splittedKeys = i.split(",");
                         for (String j : splittedKeys) {
-                            Matcher m = extractUsername.matcher(j);
-                            if (m.find()) {
-                                if (m.group().equals(username)) {
-                                    Matcher m2 = digitWithParenthesis.matcher(i);
-                                    while (m2.find()) {
-                                        borrowCountHistory.add(m2.group().replaceAll("[()]", ""));
-                                    }
-                                    borrowCount = Integer.parseInt(borrowCountHistory.get(borrowCountHistory.size() - 1));
+                            if (j.equals(username)) {
+                                Matcher m2 = digitWithParenthesis.matcher(i);
+                                while (m2.find()) {
+                                    borrowCountHistory.add(m2.group().replaceAll("[()]", ""));
                                 }
+                                borrowCount = Integer.parseInt(borrowCountHistory.get(borrowCountHistory.size() - 1));
                             }
                         }
                     }
@@ -290,14 +283,11 @@ public class Library_System {
                                                 for (String i : borrowers.keySet()) {
                                                     String[] splittedKeys = i.split(",");
                                                     for (String j : splittedKeys) {
-                                                        Matcher m = extractUsername.matcher(j);
-                                                        if (m.find()) {
-                                                            if (m.group().equals(username)) {
-                                                                if (borrowers.get(i).equals(bookName)) {
-                                                                    alreadyBorrowed = true;
-                                                                    System.out.println("You already borrowed this book!");
-                                                                    break;
-                                                                }
+                                                        if (j.equals(username)) {
+                                                            if (borrowers.get(i).equals(bookName)) {
+                                                                alreadyBorrowed = true;
+                                                                System.out.println("You already borrowed this book!");
+                                                                break;
                                                             }
                                                         }
                                                     }
@@ -332,11 +322,8 @@ public class Library_System {
                                         for (String i : borrowers.keySet()) {
                                             String[] splittedKeys = i.split(",");
                                             for (String j : splittedKeys) {
-                                                Matcher m = extractUsername.matcher(j);
-                                                if (m.find()) {
-                                                    if (m.group().equals(username)) {
-                                                        System.out.println(borrowers.get(i));
-                                                    }
+                                                if (j.equals(username)) {
+                                                    System.out.println(borrowers.get(i));
                                                 }
                                             }
                                         }
@@ -347,16 +334,14 @@ public class Library_System {
                                         for (String i : borrowers.keySet()) {
                                             String[] splittedKeys = i.split(",");
                                             for (String j : splittedKeys) {
-                                                Matcher m = extractUsername.matcher(j);
-                                                if (m.find()) {
-                                                    if (m.group().equals(username)) {
-                                                        if (borrowers.get(i).equals(bookName)) {
-                                                            borrowCount--;
-                                                            borrowers.remove(i);
-                                                        } else {
-                                                            noBookFound = true;
-                                                            System.out.println("No book found!");
-                                                        }
+                                                if (j.equals(username)) {
+                                                    if (borrowers.containsValue(bookName) && borrowers.get(i).equals(bookName)) {
+                                                        borrowCount--;
+                                                        borrowers.remove(i);
+                                                        break outerloop;
+                                                    } else if (!borrowers.containsValue(bookName)) {
+                                                        noBookFound = true;
+                                                        System.out.println("No book found!");
                                                         break outerloop;
                                                     }
                                                 }
@@ -373,15 +358,17 @@ public class Library_System {
                                         for (String i : borrowers.keySet()) {
                                             String[] splittedKeys = i.split(",");
                                             for (String j : splittedKeys) {
-                                                Matcher m = extractUsername.matcher(j);
-                                                if (m.find()) {
-                                                    if (m.group().equals(username)) {
-                                                        borrowers.put(i.replaceAll("\\(\\d\\)",
-                                                                "(" + borrowCount + ")"),
-                                                                borrowers.get(i));
-                                                        borrowers.remove(i);
-                                                        break outerloop2;
+                                                if (j.equals(username)) {
+                                                    Matcher m = digitWithParenthesis.matcher(i);
+                                                    if (m.find()) {
+                                                        if (m.group().equals("(2)")) {
+                                                            borrowers.put(i.replaceAll("\\(\\d\\)",
+                                                                    "(" + borrowCount + ")"),
+                                                                    borrowers.get(i));
+                                                            borrowers.remove(i);
+                                                        }
                                                     }
+                                                    break outerloop2;
                                                 }
                                             }
                                         }
