@@ -14,7 +14,7 @@ public class Library_System {
         Scanner input = new Scanner(System.in);
         String username, password;
         while (true) {
-            System.out.println("================REGISTER===================");
+            System.out.println("================BLAKE===================");
             System.out.print("Enter username: ");
             username = input.nextLine();
             System.out.print("Enter password: ");
